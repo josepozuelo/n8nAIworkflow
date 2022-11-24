@@ -32,6 +32,10 @@ https://github.com/josepozuelo/n8nAIworkflow/tree/main/n8n_AI_workflows
 
 Open the main JSON, it includes a walkthrough of the different stages. You can checkout the main prompt structures there as well as the main logic to create the n8n JSON for each generation.
 
-In order to run the main workflow, you first have to run the Embedding Store Creation REPL in your own Pinecone account (free). You also have to create a firebase DB with the operation/resource pairs for the Resource/operation parameters workflow
+Steps before running the workflow:
+1. Create Pinecone account and get API keys (free)
+2. Run the Embedding Store Creation REPL in your own Pinecone account
+3. Create a Firestore account
+4. Edit the three workflows in n8n_data_workflows to use the node-list and generate the parameter DB in your firestore instance
 
 After that you can explore the rest of the files included. If more people show interest I will document their usage better!
