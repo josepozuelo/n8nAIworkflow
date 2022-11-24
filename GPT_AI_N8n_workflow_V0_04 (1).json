@@ -1,0 +1,1507 @@
+{
+  "name": "GPT AI N8n workflow V0.04",
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "return [\n  {\n    json: {\n        nodes: $json.data\n    },\n  }\n];\n"
+      },
+      "name": "Create an array of objects",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        5020,
+        720
+      ],
+      "typeVersion": 1,
+      "id": "bdd3057a-4792-4cac-bb61-8f8fb2ad22df"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run once per input item.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.functionItem\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nconst connected_nodes = [];\n\nconst connected_nodes_params = {\n  \"node\":item.next_step,\n  \"type\":\"main\",\n  \"index\":0\n};\n\nconnected_nodes.push(connected_nodes_params);\n\nconst main_nodes = [];\n\nmain_nodes.push(connected_nodes);\n\nconst main = {\"main\":main_nodes}\n\nconst node = item.name;\n\nitem.connections = main\n\n\nreturn item"
+      },
+      "id": "71fad277-9114-4a56-a0e6-2a95cf1ef411",
+      "name": "add position to each node1",
+      "type": "n8n-nodes-base.functionItem",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run only once, no matter how many input items there are.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.function\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Loop over inputs and add a new field called 'myNewField' to the JSON of each one\n\nobj3 = {}\n\nitems.forEach((item, index) => {\n  obj3[item.json.name] = item.json.connections;\n});\n\nconst new_items = []\nobj_json = {\"json\":{\"connections\":obj3}}\nnew_items.push(obj_json)\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn new_items;"
+      },
+      "id": "d18dbc7d-c463-4d2e-9e41-4b8da2a36790",
+      "name": "Function2",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "mergeByIndex"
+      },
+      "id": "e2eedc53-a516-48a2-9352-d80effa7d80e",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "Your AI n8n workflow!",
+        "includeHtml": true,
+        "htmlMessage": "=<p>Hey! Thanks for using my AI n8n workflow generator.</p>\n\n<p>Just copy and paste the following JSON into the n8n canvas and the nodes will automatically be added. </p>\n\n<p>Please let me know through twitter if anything went wrong or if you have any suggestions! </p>\n<p>Your prompt was: \"{{$node[\"Webhook\"].json[\"body\"][\"data\"][\"fields\"][0][\"value\"]}}\" </p>\n<p>The workflow should do these steps: </p>\n<p>{{$node[\"HTTP Request\"].json[\"choices\"][0][\"text\"]}}</p>\n\n<p>Copy and paste this: </p>\n<p>{{JSON.stringify($json)}}</p>",
+        "message": "d",
+        "toList": [
+          "={{$node[\"input_data\"].json[\"body\"][\"data\"][\"fields\"][1][\"value\"]}}"
+        ],
+        "additionalFields": {
+          "senderName": "AI n8n workflow"
+        }
+      },
+      "id": "b52c5a5b-d4ff-4ead-b0e6-9315636dc6e4",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        3200,
+        1160
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "model",
+              "value": "text-similarity-babbage-001"
+            },
+            {
+              "name": "input",
+              "value": "={{$json[\"values\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "6f089469-ae8f-4c2c-96b7-c842e1273f8e",
+      "name": "Get embedding from GPT1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        1480,
+        880
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "14",
+          "name": "Open AI personal account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "id",
+              "value": "={{$json[\"id\"]}}"
+            },
+            {
+              "name": "name",
+              "value": "={{$json[\"values\"].replace(/[^a-zA-Z ]/g, \"\")}}"
+            },
+            {
+              "name": "type",
+              "value": "={{$json[\"selected_node\"]}}"
+            },
+            {
+              "name": "parameters",
+              "value": "={{$json[\"parameters\"]}}"
+            },
+            {
+              "name": "next_step",
+              "value": "={{$json.next_step.replace(/[^a-zA-Z ]/g, \"\")}}"
+            }
+          ],
+          "number": [
+            {
+              "name": "typeVersion",
+              "value": 1
+            },
+            {
+              "name": "step_index",
+              "value": "={{ $json[\"step_index\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a04970b5-2e56-4a45-bbc5-647a43558d98",
+      "name": "Set4",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        3740,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "aggregateItems",
+        "aggregate": "aggregateAllItemData",
+        "include": "allFieldsExcept",
+        "fieldsToExclude": {
+          "fields": [
+            {
+              "fieldName": "id"
+            },
+            {
+              "fieldName": "next_step"
+            },
+            {
+              "fieldName": "step_index"
+            }
+          ]
+        }
+      },
+      "id": "3e9adf52-7f07-4604-a3f1-77a3fd7cebe0",
+      "name": "Item Lists2",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 1,
+      "position": [
+        4720,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.selected_node}}",
+              "value2": "n8n-nodes-base.if"
+            }
+          ]
+        }
+      },
+      "id": "a6e510c3-60d3-4ee4-a77c-727d77f7a1d5",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        3420,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "1027"
+      },
+      "id": "7c2b8213-7acb-4fc5-a118-883d8523b7a4",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        3740,
+        -500
+      ],
+      "alwaysOutputData": true,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "55abef4d-cd5c-451a-874d-d2d08c348436",
+      "name": "Merge4",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        3980,
+        -300
+      ],
+      "alwaysOutputData": true,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "id": "c8bf0217-ced0-4ac4-8f41-8188273b8252",
+      "name": "Merge5",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        4580,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run once per input item.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.functionItem\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Add a new field called 'myNewField' to the JSON of the item\nx_axis= 320+(item.step_index+1)*300\nitem.position= [x_axis,220]\n\n\n\nreturn item"
+      },
+      "id": "c3353cd2-881a-4ef7-9e2f-5d7d3bb35ece",
+      "name": "add position to each node",
+      "type": "n8n-nodes-base.functionItem",
+      "typeVersion": 1,
+      "position": [
+        4020,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "Q",
+              "value": "={{$items(\"Webhook\")[0].json[\"body\"][\"data\"][\"fields\"][0][\"value\"]}}"
+            },
+            {
+              "name": "selected_node",
+              "value": "={{ $json[\"selected_node\"] }}"
+            },
+            {
+              "name": "values",
+              "value": "={{ $json[\"step_description\"] }}"
+            },
+            {
+              "name": "next_step",
+              "value": "={{ $json[\"next_step\"] }}"
+            }
+          ],
+          "number": [
+            {
+              "name": "step_index",
+              "value": "={{ $json[\"step_index\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "819ce7a2-eeb5-4d20-a5c6-60b94b4645cb",
+      "name": "Set5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        3220,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "1029"
+      },
+      "id": "089f6c0a-4965-4186-8dae-687ae148c299",
+      "name": "Execute Workflow1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        3420,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "values",
+              "field2": "values"
+            }
+          ]
+        },
+        "joinMode": "keepEverything",
+        "options": {}
+      },
+      "id": "0a8967a1-7ffe-4856-82e3-19e455c84484",
+      "name": "Merge6",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        3660,
+        20
+      ],
+      "alwaysOutputData": true,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Add a new field called 'myNewField' to the\n// JSON of the item\n\nif (typeof $json.parameters == 'undefined') {\n    $json.parameters = {}\n}\nreturn $input.item;"
+      },
+      "id": "68cd58a9-a740-447f-a0b0-e7cdc2ac4d8c",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        3780,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Examples",
+              "value": "={\"current_step\":\"Trigger: Cron every Monday 9am\"}\n{\"nodes\":[{\"id\":\"n8n-nodes-base.cron\", \"step_description\":\"Trigger: Cron every Monday 9am\"}]}\n\n{\"current_step\":\"Send email with Mail Chimp\"}\n{\"nodes\":[{\"id\":\"n8n-nodes-base.mailchimp\", \"step_description\":\"Trigger: Cron every Monday 9am\"}]}\n\n{\"current_step\":\"Trigger: Webhook\"}\n{\"nodes\":[{\"id\":\"n8n-nodes-base.webhook\", \"step_description\":\"Trigger: Webhook\"}]}\n\n{\"current_step\":\"Trigger: Use Google Sheets Trigger to receive new rows\"}\n{\"nodes\":[{\"id\":\"n8n-nodes-base.cron\", \"step_description\":\"Use Cron node to poll Sheets API\"},{\"id\":\"n8n-nodes-base.googleSheets\", \"step_description\":\"Retrieve new rows from sheets\"}]}\n\n{\"current_step\":\"Use OpenAI node to run prompt through GPT\"}\n{\"nodes\":[{\"id\":\"n8n-nodes-base.httpRequest\", \"step_description\":\"Use http request node to use OpenAI's API and run prompt through GPT\"}]}\n\n{\"current_step\":\"Trigger: Every time a new slack message comes into the general channel\"}\n{\"nodes\":[{\"id\":\"n8n-nodes-base.cron\", \"step_description\":\"Use Cron node to poll Slack API\"},{\"id\":\"n8n-nodes-base.slack\", \"step_description\":\"Poll Slack general channel for new messages\"}]}"
+            },
+            {
+              "name": "Intro",
+              "value": "=You are receiving an automation step and want to assign the right node ids to each step. The output should be in this JSON format:{\"nodes\":[{\"id\":<exact node id from list str>, \"step_description\":<automation step action description str>}]}"
+            },
+            {
+              "name": "Run_Context",
+              "value": "=These are the only available nodes: \"{{JSON.stringify($json[\"matches\"])}}\" and \"{{JSON.stringify($json[\"core_nodes\"])}}\"\nRemember NOT to use any nodes that aren't explicitly in this list, if a trigger isn't in the list use {\"id\":\"n8n-nodes-base.webhook\"} or {\"id\":\"n8n-nodes-base.cron\"} plus the action trigger for the service, if an action node isn't available for the service then use {\"id\":\"n8n-nodes-base.httpRequest\"} as default.\n{\"current_step:\"{{$json[\"step_description\"]}}\"}"
+            },
+            {
+              "name": "Instantiator"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0dedef4f-e619-46e2-999a-876f00226823",
+      "name": "Prompt parts , From Q to Steps4",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Prompt",
+              "value": "={{$json[\"Intro\"]}}\n\n{{$json[\"Examples\"]}}\n\n{{$json[\"Run_Context\"]}}\\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0c9475c0-56c0-4f28-a125-8748b85af190",
+      "name": "Prompt parts , From Q to Steps5",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/completions",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "model",
+              "value": "text-davinci-002"
+            },
+            {
+              "name": "prompt",
+              "value": "={{$json[\"Prompt\"]}}"
+            },
+            {
+              "name": "max_tokens",
+              "value": "={{600}}"
+            },
+            {
+              "name": "temperature",
+              "value": "={{0.1}}"
+            }
+          ]
+        }
+      },
+      "id": "cac565c1-6e28-4cab-8010-3e9a1dfc31a9",
+      "name": "HTTP Request2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        -240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "14",
+          "name": "Open AI personal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field\n// called 'myNewField' to the JSON of each one\nvar node_names = []\nfor (const item of $input.all()) {\n  node_names.push(item.json.id)\n}\n\nreturn [{\"json\": {\"names\":node_names}}];"
+      },
+      "id": "4aeffb0d-b16c-4f77-aac6-1b00a0a96ea2",
+      "name": "Accepted_node_names",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "81194b55-659c-472b-a1fd-d6458aead63b",
+      "name": "Merge2",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        2520,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Prompt",
+              "value": "={{$json[\"Intro\"]}}\n\n{{$json[\"Examples\"]}}\n\n{{$json[\"Run_Context\"]}}\\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0992e089-151b-450c-8ac0-f0d3b3bf746e",
+      "name": "Prompt parts , From Q to Steps7",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "requestMethod": "POST",
+        "url": "https://n8n-nodes-72068b5.svc.us-west1-gcp.pinecone.io/query",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "vector",
+              "value": "={{$node[\"Get embedding from GPT\"].json[\"data\"][0][\"embedding\"]}}"
+            },
+            {
+              "name": "topK",
+              "value": "={{2}}"
+            },
+            {
+              "name": "includeMetadata",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "id": "5a4eed7a-1c89-499d-abf6-ccc853ccdc4a",
+      "name": "Pinecone1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -180
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "15",
+          "name": "Pinecone personal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field\n// called 'myNewField' to the JSON of each one\nvar new_items = []\nfor (const item of $input.all()) {\n  var steps= item.json.choices[0].text.replaceAll('\\n',\"\");\n  json_steps = JSON.parse(steps);\n  console.log(json_steps.automation_steps);\n  for (let step of json_steps.automation_steps) {\n    var new_item = {\"json\": {\"step\":step.step, \"node_name\":step.name, \"step_description\":step.step_description}}\n    new_items.push(new_item)\n  }\n\n}\n\nreturn new_items"
+      },
+      "id": "4b625387-8062-4550-8894-014d9ccd9317",
+      "name": "Steps from GPT 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/completions",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "model",
+              "value": "text-davinci-002"
+            },
+            {
+              "name": "prompt",
+              "value": "={{$json[\"Prompt\"]}}"
+            },
+            {
+              "name": "max_tokens",
+              "value": "={{600}}"
+            },
+            {
+              "name": "temperature",
+              "value": "={{0.1}}"
+            }
+          ]
+        }
+      },
+      "id": "db46ad4b-e254-436e-85b6-23d916f586c8",
+      "name": "GPT Main steps call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        140,
+        -180
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "14",
+          "name": "Open AI personal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field\n// called 'myNewField' to the JSON of each one\n\nfor (const item of $input.all()) {\n  var matches = []\n  for (let match of item.json.matches) {\n    var match_obj = {}\n    match_obj.id = match.metadata.type;\n    match_obj.description = match.metadata.description;\n    matches.push(match_obj)\n    console.log(match_obj)\n  }\n  item.json.matches = matches\n}\n\nreturn $input.all();"
+      },
+      "id": "3fb2a9bc-dd9f-4193-9fec-ccc3a7b31ae9",
+      "name": "Prep node selection from embeddings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "mergeByIndex",
+        "join": "inner"
+      },
+      "id": "14381ffb-5dcb-496b-883d-d30315b110f2",
+      "name": "Link embeddings to steps",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 1,
+      "position": [
+        900,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\"core_nodes\":[{\"id\":\"n8n-nodes-base.code\",\"description\":\"Run custom JavaScript code (transform data)\"},{\"id\":\"n8n-nodes-base.if\",\"description\":\"Perform if statements to split or filter data\"},{\"id\":\"n8n-nodes-base.set\",\"description\":\"Sets values on items and optionally remove other values\"},{\"id\":\"n8n-nodes-base.cron\",\"description\":\"Triggers the workflow at a specific time (default trigger) \"},{\"id\":\"n8n-nodes-base.webhook\",\"description\":\"Starts the workflow when a webhook is called (If an external service doesn't have a trigger, use this as default])\"},{\"id\":\"n8n-nodes-base.httpRequest\",\"description\":\"Makes an HTTP request and returns the response data (default action if external service doesn't have a node])\"}]}]"
+      },
+      "id": "f15dccf2-8181-444e-8135-6b0b64d217a2",
+      "name": "Core_nodes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "matches",
+        "options": {}
+      },
+      "id": "8b5bcec5-fc91-4b6a-9c6d-0afafd6acce5",
+      "name": "All selected nodes",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        120
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "e179a718-7538-4f67-8137-d35b42518afd",
+      "name": "Nodes to check output",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        1960,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field\n// called 'myNewField' to the JSON of each one\nvar new_items=[];\nfor (const item of $input.all()) {\n  var text = JSON.parse(item.json.choices[0].text.trim().replaceAll('\\n',\"\")) ;\n  for (let step of text.nodes) {\n    var new_item = {\"json\":{\"selected_node\":step.id,\"step_description\":step.step_description}};\n    new_items.push(new_item)\n  }\n}\n\nreturn new_items;"
+      },
+      "id": "5fe6449d-48f5-4463-acb0-5d5fdd684c77",
+      "name": "New Steps from GPT with ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field\n// called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.correct = $('Accepted_node_names').first().json.names.includes(item.json.selected_node)\n  console.log($('Accepted_node_names').first().json.names)\n}\n\nreturn $input.all();"
+      },
+      "id": "bc600fa8-af47-4c40-aabd-260f74249dd0",
+      "name": "Check if node ids exist",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        2680,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "c29a522a-8c96-4935-887e-9e1bfcc53c1d",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "model",
+              "value": "text-search-curie-query-001"
+            },
+            {
+              "name": "input",
+              "value": "={{$json[\"node_name\"]}} {{$json[\"step_description\"]}}"
+            }
+          ]
+        }
+      },
+      "id": "e0f9cdcc-aa2c-4bbb-ba14-caa72f73de42",
+      "name": "Get embedding from GPT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -180
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "14",
+          "name": "Open AI personal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Code here will run only once, no matter how many input items there are.\n// More info and help: https://docs.n8n.io/nodes/n8n-nodes-base.function\n// Tip: You can use luxon for dates and $jmespath for querying JSON structures\n\n// Loop over inputs and add a new field called 'myNewField' to the JSON of each one\n//for (item of items) {\n//  item.json.myNewField = 1;\n//}\n\n//items.forEach(function (item, i) {\n//    item.json.next_step = item;\n//});\n\nfor (let i = 0; i < items.length; i++) {\n  items[i].json.step_index = i\n  if (i<items.length-1) {\n    items[i].json.next_step = items[i+1].json.step_description;\n  } else {\n    items[i].json.next_step = '';\n  }\n  ;\n}\n\n// You can write logs to the browser console\nconsole.log('Done!');\n\nreturn items;"
+      },
+      "id": "a230fd21-15be-43a1-a109-5e213270c096",
+      "name": "Create step index",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        2900,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Examples",
+              "value": "={\"Q\": \"Get customers from google sheets and send each an email using mail chimp schedule for every Monday\"}\nThese are the only available nodes: [{}]\n{\"automation_steps\":[{\"step\":1 ,\"name\":\"Cron\", \"step_description\":\"Trigger: Cron every Monday 9am\"},{\"step\":2 ,\"name\":\"Google Sheets\", \"step_description\":\"Get rows from Sheets\"},{\"step\":3 ,\"name\":\"Mailchimp\", \"step_description\":\"Send email with Mail Chimp\"}]}\n\n{\"Q\": \"Everytime you receive a webhook with customer data, check if it's the customer's birthday and if it is, send slack message to Customer service\"}\n{\"automation_steps\":[{\"step\":1 ,\"name\":\"Webhook\", \"step_description\":\"Trigger: Webhook\"},{\"step\":2 ,\"name\":\"IF\", \"step_description\":\"Use if node to check if the birthday field = today\"},{\"step\":3 ,\"name\":\"Slack\", \"step_description\":\"Send a Slack message to Customer Service Channel\"}]}\n\n{\"Q\": \"When a new order is registered in a Clickup task check if the order is more than 100 dollars, if it is then multiply the order value by 1.13 to get after tax value, then send a whatsapp using Twilio to my number\"}\n{\"automation_steps\":[{\"step\":1 ,\"name\":\"ClickUp Trigger\", \"step_description\":\"Trigger: When a new task is created in Clickup\"},{\"step\":2 ,\"name\":\"IF\", \"step_description\":\"Use IF node to check if the order value is > 100\"},{\"step\":3 ,\"name\":\"Code\", \"step_description\":\"Execute javascript function to multiply order value by 1.13 and output after tax value\"},{\"step\":4 ,\"name\":\"Twilio\", \"step_description\":\"Send a WhatsApp message using Twilio with order value plus tax\"}]}"
+            },
+            {
+              "name": "Intro",
+              "value": "=Analyze the Q and think about the automation steps needed to solve it. The output should have the following shape:{\"automation_steps\":[{\"step\":<step number int>,\"name\":<exact node name str>, \"step_description\":<action to be taken in the step using the selected node str>}]}"
+            },
+            {
+              "name": "Run_Context",
+              "value": "={\"Q\":\"{{$json[\"body\"][\"data\"][\"fields\"][0][\"value\"]}}\"}"
+            },
+            {
+              "name": "Instantiator"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "13de5272-c474-4284-9bf2-98b408bf8262",
+      "name": "Prompt parts , From Q to Steps6",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nreturn $input.all()"
+      },
+      "id": "ef390098-6c31-4fc8-9956-9c60f8c9d28e",
+      "name": "input_data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{$json.parameters}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "8f1a5766-212c-4181-8cd8-1f391acbb22c",
+      "name": "IF2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        4220,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{$json.selected_node}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "818ecfee-433b-4222-84c0-a90e8dde8c50",
+      "name": "IF3",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        4100,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json[\"selected_node\"] }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "99ea5673-810b-495b-a6c0-87c2817f1a9f",
+      "name": "IF1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "4d1f00b1-85f3-4f8c-85dc-19a02b173d49",
+        "options": {}
+      },
+      "id": "d42f8bc7-f77b-4f43-86a9-ca5a1b9a2ccd",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        100
+      ],
+      "webhookId": "4d1f00b1-85f3-4f8c-85dc-19a02b173d49"
+    },
+    {
+      "parameters": {
+        "content": "## Stage 1 GPT generates creative automation steps\nThis is a Prompt with few-shot examples. The prompt is formated to output valid JSON at \\n. This makes it easier to extract the steps in structured format.",
+        "height": 465.4139534883709,
+        "width": 728.6623255813954
+      },
+      "id": "11b1c002-800e-47dc-9c48-ca99e94eea8d",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Stage 2 Generate GPT embeddings and use them to semantically search nodes DB\nAn embedding is a vector representation of the high-dimension space represented in a passage of text. This means it captures the words/characters/concepts in a passage and turns them into a numeric representation that can then be compared to incoming embeddings (with techniques that measure the distance between the vectors)\n\nWe use pinecone to store our embeddings and realize the semantic search, but this could be done in many different ways. Checkout the repl I used to create the pinecone index https://replit.com/@JosePozuelo/GPT3embeddingstocsv#create_embeddings.py",
+        "height": 680.3964189767429,
+        "width": 781.481293395349
+      },
+      "id": "8fa261dd-8143-4f2f-b229-9e4db4324269",
+      "name": "Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Stage 3 Feed relevant node options and ask GPT to output the exact nodeids (types)\n\nIn this stage we feed each automation step into GPT again with a list of relevant nodes (the nodes we pulled from the semantic searc and some core nodes that are always useful)\n\nWith this relevant context, we ask GPT to output deterministically the exact ids of the nodes it should use for each automation stage. \n\nWe also ask GPT that given the context, assign new automation steps in case it doesn't find relevant nodes (Ex: Sheets doesn't have a trigger, so it should use cron + Google sheet action as a substitute)",
+        "height": 880.2050143255808,
+        "width": 1602.4340003720934
+      },
+      "id": "ead4857a-6ddb-4992-8710-c891377e000c",
+      "name": "Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        -480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Stage 4 GPT creation and selection of parameters per node type\n\nCurrently we have a specific logic for the IF node and we are also assigning the resource/operation pairs for all nodes\n\nTo-do:\n- Add custom logic for CODE nodes (teaching GPT about the internal structure, methods, and variables available in n8n)\n- Add a DB of parameters that are required for each node, link them to the resource/operation combinations that \"show\" them. Then create a GPT workflow to fill those in for each node.\n\n",
+        "height": 985.9008654883721,
+        "width": 1839.8876933953509
+      },
+      "id": "8ff9a759-065f-4424-95c0-0ead509a48a0",
+      "name": "Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3140,
+        -700
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Stage 5a Putting together the connections object\n\nThe connections object of n8n's workflow JSON structure tells n8n where each node's output connects to. Here we take each step's node and connect it to the next node",
+        "height": 623.9287724651168,
+        "width": 1592.298781767443
+      },
+      "id": "dd43431d-4b9c-4fd5-97ae-15d96433dab8",
+      "name": "Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Stage 5b Putting together the \"nodes\" array\n\nThe nodes array of n8n's workflow JSON structure contains each node along with its parameters, position, and other stuff. ",
+        "height": 623.9287724651168,
+        "width": 976.9462236279077
+      },
+      "id": "9464340c-558d-489f-897b-baf01319dbf5",
+      "name": "Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2460,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Data prep Stage 1: Scrape or get the data\n\nFirst step is always getting and cleaning the data. In this case I used n8n's node list which is sent to the n8n client when you create a node. (had to be a bit hacky to retrieve the whole list of nodes)",
+        "height": 249.78604651162698,
+        "width": 728.6623255813954
+      },
+      "id": "20c62a7f-c5bc-4f30-9247-8d11346276ab",
+      "name": "Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -1280
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Data prep Stage 2: Synthetic data creation\n\nAt first I created the embeddings for each node using its name and description, but this wasn't giving me good results.\n\nI ended up creating a GPT workflow to create a couple of example automation steps that would come out of each node. This way, the text being compared to the embeddings store is in similar format to the store itself",
+        "height": 249.78604651162698,
+        "width": 728.6623255813954
+      },
+      "id": "23f78a15-0554-4f3a-817e-c31486a42c34",
+      "name": "Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        -1280
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Data prep Stage 3: Embedding vector store creation\n\nhttps://replit.com/@JosePozuelo/GPT3embeddingstocsv#create_embeddings.py",
+        "height": 249.78604651162698,
+        "width": 728.6623255813954
+      },
+      "id": "45c90882-c438-4c3a-87c0-435b2979759b",
+      "name": "Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -1280
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "add position to each node1": {
+      "main": [
+        [
+          {
+            "node": "Function2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create an array of objects": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set4": {
+      "main": [
+        [
+          {
+            "node": "add position to each node1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "add position to each node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Item Lists2": {
+      "main": [
+        [
+          {
+            "node": "Create an array of objects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Workflow1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge5": {
+      "main": [
+        [
+          {
+            "node": "IF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "add position to each node": {
+      "main": [
+        [
+          {
+            "node": "Item Lists2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set5": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow1": {
+      "main": [
+        [
+          {
+            "node": "Merge6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge6": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt parts , From Q to Steps4": {
+      "main": [
+        [
+          {
+            "node": "Prompt parts , From Q to Steps5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt parts , From Q to Steps5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "New Steps from GPT with ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepted_node_names": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Check if node ids exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt parts , From Q to Steps7": {
+      "main": [
+        [
+          {
+            "node": "GPT Main steps call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone1": {
+      "main": [
+        [
+          {
+            "node": "Link embeddings to steps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Steps from GPT 1": {
+      "main": [
+        [
+          {
+            "node": "Get embedding from GPT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Link embeddings to steps",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GPT Main steps call": {
+      "main": [
+        [
+          {
+            "node": "Steps from GPT 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep node selection from embeddings": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Link embeddings to steps": {
+      "main": [
+        [
+          {
+            "node": "Prep node selection from embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Core_nodes": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Nodes to check output",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "All selected nodes": {
+      "main": [
+        [
+          {
+            "node": "Nodes to check output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nodes to check output": {
+      "main": [
+        [
+          {
+            "node": "Accepted_node_names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Steps from GPT with ID": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "All selected nodes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prompt parts , From Q to Steps4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get embedding from GPT": {
+      "main": [
+        [
+          {
+            "node": "Pinecone1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if node ids exist": {
+      "main": [
+        [
+          {
+            "node": "Create step index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create step index": {
+      "main": [
+        [
+          {
+            "node": "Set5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt parts , From Q to Steps6": {
+      "main": [
+        [
+          {
+            "node": "Prompt parts , From Q to Steps7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "input_data": {
+      "main": [
+        [
+          {
+            "node": "Prompt parts , From Q to Steps6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "IF2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF2": {
+      "main": [
+        [
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "IF3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF3": {
+      "main": [
+        [
+          {
+            "node": "Merge5",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "IF1": {
+      "main": [
+        [
+          {
+            "node": "Set4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "input_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "any",
+    "saveExecutionProgress": "DEFAULT",
+    "errorWorkflow": "1031"
+  },
+  "hash": "e1a1ec09e36763842de23b8ef94f7a91",
+  "id": 1034,
+  "meta": {
+    "instanceId": "ed6ef39cc6422be5fc30d4cdc419aa16ae92ea01e88abf334b379f622c4984f7"
+  },
+  "tags": []
+}
