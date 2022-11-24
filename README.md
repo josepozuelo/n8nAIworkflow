@@ -38,4 +38,7 @@ Steps before running the workflow:
 3. Create a Firestore account
 4. Edit the three workflows in n8n_data_workflows to use the node-list and generate the parameter DB in your firestore instance
 
+To visualize the workflow:
+Just copy and paste each the whole contents of the JSON file into the n8n workflow editor. (https://app.n8n.cloud/dashboard)
+
 After that you can explore the rest of the files included. If more people show interest I will document their usage better!
