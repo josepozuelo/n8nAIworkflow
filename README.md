@@ -12,18 +12,21 @@ The purpose of this project was to create an educational example of how to creat
 ## Project parts
 
 ### Main n8n workflow
+https://github.com/josepozuelo/n8nAIworkflow/tree/main/n8n_AI_workflows
 
 ### Embedding Store Creation REPL
 https://replit.com/@JosePozuelo/GPT3embeddingstocsv#create_embeddings.py
 
 ### Pinecone vector store
-
+https://app.pinecone.io/
 
 ### N8n node-list JSON
 
 ### If node parameters workflow
+https://github.com/josepozuelo/n8nAIworkflow/tree/main/n8n_AI_workflows
 
 ### Resource/operation parameters workflow
+https://github.com/josepozuelo/n8nAIworkflow/tree/main/n8n_AI_workflows
 
 ## How to use/explore?
 
