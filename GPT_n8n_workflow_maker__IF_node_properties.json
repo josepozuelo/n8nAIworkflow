@@ -1,0 +1,306 @@
+{
+  "name": "GPT n8n-workflow maker- IF node properties",
+  "nodes": [
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Examples",
+              "value": "=Q: \"Everytime a new clickup task is created, filter the tasks by status=urgent, then send a slack message for those messages\",\ncurrent_automation_step: \"datatransformation Use Filter node to filter by statusurgent\",\noperation_options: \"contains\", \"notContains\", \"endsWith\", \"value\": \"notEndsWith\", \"value\": \"equal\", \"value\": \"notEqual\", \"value\": \"regex\", \"value\": \"notRegex\", \"value\": \"startsWith\", \"value\": \"notStartsWith\", \"value\": \"isEmpty\", \"value\": \"isNotEmpty\"\nOutput: \n{\"field_type\": \"string\"}\n{\"value1\": \"{{$json[\"example1_json_reference\"]}}\"}\n{\"operation\": \"equal\"}\n{\"value2\": \"urgent\"}\n\nQ: \"Get all rows from sheets, make a calculation where total = subtotal + tax, then insert the items that have a total higher than 100\",\ncurrent_automation_step: \"data_transformation: Use IF node to check if the total is > 100\",\noperation_options: \"smaller\", Smaller or Equal\", \"smallerEqual\",\"equal\" ,\"notEqual\",\"larger\" ,\"largerEqual\",\"isEmpty\", \"isNotEmpty\"\nOutput: \n{\"field_type\": \"integer\"}\n{\"value1\": \"{{$json[\"example2_json_reference\"]}}\"}\n{\"operation\": \"larger\"}\n{\"value2\": 100}\n\nQ: \"When a typeform is submitted, check if the email field is filled up, if it isn't send a warning to slack with the submission id\",\ncurrent_automation_step: \"data_transformation: Use IF node to check if the email field is filled up\",\nOutput: \n{\"field_type\": \"string\"}\n{\"value1\": \"{{$json[\"example1_json_reference\"]}}\"}\n{\"operation\": \"isNotEmpty\"}"
+            },
+            {
+              "name": "Intro",
+              "value": "You are tasked with setting up automation parameters, follow the instructions and the format in the examples to output the necessary entities."
+            },
+            {
+              "name": "Run_Context",
+              "value": "=Remember that you can access variables using \nQ:\"{{$json[\"Q\"]}}\" ,current_automation_step: \"{{$json[\"values\"]}}\","
+            },
+            {
+              "name": "Instantiator",
+              "value": "Output:"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "89e577bf-7117-4eac-a48d-369f6b347008",
+      "name": "Prompt parts , From Q to Steps",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        540,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Prompt",
+              "value": "={{$json[\"Intro\"]}}\n\n{{$json[\"Examples\"]}}\n\n{{$json[\"Run_Context\"]}}\n\n{{$json[\"Instantiator\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7aad6f52-f71d-445b-9dd4-132b11b2a0fd",
+      "name": "Prompt parts , From Q to Steps1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        760,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "requestMethod": "POST",
+        "url": "https://api.openai.com/v1/completions",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "model",
+              "value": "text-davinci-002"
+            },
+            {
+              "name": "prompt",
+              "value": "={{$json[\"Prompt\"]}}"
+            },
+            {
+              "name": "max_tokens",
+              "value": "={{600}}"
+            },
+            {
+              "name": "temperature",
+              "value": "={{0.3}}"
+            }
+          ]
+        }
+      },
+      "id": "313b046e-273e-4cf1-9d14-aef8782b2d6b",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        960,
+        340
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "14",
+          "name": "Open AI personal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "let myValues = [];\nfor (item of items) {\n  let strings = item.json.choices[0].text.trim().split('\\n');\n  \n  for (string of strings){\n    let string_without_slashes = string.replace(/\\\\/g, \"\")\n    let parsed_strings = JSON.parse(string_without_slashes)\n    myValues.push(parsed_strings);\n  }\n}\n\n\nvar filtered = myValues.filter(elm => elm)\n\nconsole.log(filtered)\n\nconst obj = Object.fromEntries(filtered.flatMap(Object.entries));\n\nconsole.log(obj)\n\nreturn {\n      json: obj\n    };"
+      },
+      "id": "3c5815fb-2075-41fa-92f9-da425a1c8042",
+      "name": "Function",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        340
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "example1_json_reference",
+              "value": "{{$json.status}}"
+            },
+            {
+              "name": "example2_json_reference",
+              "value": "{{$json.total}}"
+            },
+            {
+              "name": "example3_json_reference",
+              "value": "{{$json.email}}"
+            },
+            {
+              "name": "Q",
+              "value": "={{ $json[\"Q\"] }}"
+            },
+            {
+              "name": "current_step",
+              "value": "={{ $json[\"name\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "78239990-3842-4565-8a55-94371416c4f9",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        340,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field\n// called 'myNewField' to the JSON of each one\n\nnew_items = []\n\nfor (const item of $input.all()) {\n  var operations = []\n  var inner_object = item.json\n  var field_type = item.json.field_type\n  delete inner_object.field_type\n  operations.push(inner_object)\n  var conditions = {\n    [field_type]:operations\n  }\n  var new_item = {\"json\":{parameters:{conditions:conditions}}}\n  //item.json.conditions = JSON.parse(JSON.stringify(conditions))\n  new_items.push(new_item)\n  console.log(conditions)\n}\n\nreturn new_items;"
+      },
+      "id": "5c899932-7372-478f-ab3e-149116cd7b0d",
+      "name": "building the parameters JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        340
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "6745d2ee-eb6c-4951-a90a-848e492450e9",
+      "name": "When Called By Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{$json.values}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "8048502d-f9ed-4c39-b1c3-98845cdaebb3",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        120,
+        360
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "a6383ef7-e9db-4c8c-ba85-50753b65075b",
+      "name": "NoOp",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        540
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prompt parts , From Q to Steps": {
+      "main": [
+        [
+          {
+            "node": "Prompt parts , From Q to Steps1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt parts , From Q to Steps1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Prompt parts , From Q to Steps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function": {
+      "main": [
+        [
+          {
+            "node": "building the parameters JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Called By Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NoOp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "any"
+  },
+  "hash": "134a0543c0bfa3fb0579d2962a02ae41",
+  "id": 1027,
+  "meta": {
+    "instanceId": "ed6ef39cc6422be5fc30d4cdc419aa16ae92ea01e88abf334b379f622c4984f7"
+  },
+  "tags": []
+}
